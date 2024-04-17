@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import searchImage from './assets/search.png';
 import sunImage from './assets/sun.png';
 import humidityImage from './assets/humidity.png';
 import windImage from './assets/wind.png';
@@ -27,8 +26,12 @@ function App() {
 
   useEffect(() => {
     checkWeather(city);
-  }, []);
-  
+  }, []); // Prazdne pole zavislosti
+
+  const handleCityChange = (newCity) => {
+    setCity(newCity);
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       checkWeather(city);
@@ -38,7 +41,7 @@ function App() {
   return (
     <div className="block">
       <div className="search">
-        <input type="text" placeholder="Zadejte město" onChange={(e) => setCity(e.target.value)} value={city} onKeyPress={handleKeyPress}></input>
+        <input type="text" placeholder="Zadejte město" onChange={(e) => handleCityChange(e.target.value)} value={city} onKeyPress={handleKeyPress}></input>
       </div>
       <div className="weather">
         <h2 className="city">{weatherData ? weatherData.name : 'Praha'}</h2>
