@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import sunImage from './assets/sun.png';
 import humidityImage from './assets/humidity.png';
 import windImage from './assets/wind.png';
+import searchImage from './assets/search.png'
 
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
@@ -11,7 +12,7 @@ function App() {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  async function checkWeather(city) {
+  async function checkWeather() {
     try {
       setLoading(true);
       const response = await fetch(apiUrl + city + `&appid=` + apiKey);
@@ -24,24 +25,21 @@ function App() {
     }
   }
 
+  const handleSearch = () => {
+    checkWeather();
+  };
+
   useEffect(() => {
-    checkWeather(city);
-  }, []); // Prazdne pole zavislosti
-
-  const handleCityChange = (newCity) => {
-    setCity(newCity);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      checkWeather(city);
+    if (city.trim() !== "") {
+      checkWeather();
     }
-  };
+  }, []);
 
   return (
     <div className="block">
       <div className="search">
-        <input type="text" placeholder="Zadejte město" onChange={(e) => handleCityChange(e.target.value)} value={city} onKeyPress={handleKeyPress}></input>
+        <input type="text" placeholder="Zadejte město" onChange={(e) => setCity(e.target.value)} value={city}></input>
+        <button onClick={handleSearch}><img src={searchImage} alt="Hledat" /></button>
       </div>
       <div className="weather">
         <h2 className="city">{weatherData ? weatherData.name : 'Praha'}</h2>
