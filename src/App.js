@@ -141,7 +141,7 @@ function App() {
         return response.json();
       })
       .then(data => {
-        setLong(data[0].lon);
+        setLong(data[0].lon+10);
         setLat(data[0].lat);
       })
       .catch(error => {
