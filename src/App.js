@@ -20,8 +20,6 @@ const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric
 
 const cityApi = "http://api.openweathermap.org/geo/1.0/direct?q="
 
-const historyApi = "https://archive-api.open-meteo.com/v1/archive?"
-
 function App() {
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
@@ -118,7 +116,6 @@ function App() {
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
     const cityApiUrl = `${cityApi}${searchedCity}&limit=1&appid=${apiKey}`;
-    const historyApiUrl = `${historyApi}latitude=${lat}&longtitude=${long}&start_date=2024-04-13&end_date=2024-04-13&hourly=temperature_2m,rain,snowfall,cloud_cover`;
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
@@ -194,8 +191,8 @@ function App() {
         <tbody>
             <tr>
                 <td>{dOneDay}.{dOneMonth}.{dOneYear}</td>
-                <td>Řádek 1, Sloupec 2</td>
-                <td>Řádek 1, Sloupec 3</td>
+                <td>{long}</td>
+                <td>{lat}</td>
                 <td>Řádek 1, Sloupec 4</td>
                 <td>Řádek 1, Sloupec 5</td>
             </tr>
