@@ -11,15 +11,17 @@ function App() {
   const [humidity, setHumidity] = useState("Loading...");
   const [wind, setWind] = useState("Loading...");
   const [city, setCity] = useState("Praha");
+  const [searchedCity, setSearchedCity] = useState("Praha");
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
-      setCity(event.target.value);
+      setSearchedCity(event.target.value);
+      event.target.value = "";
     }
   };
   
   useEffect(() => {
-    const apiUrl = `${apiAdress}${city}&appid=${apiKey}`;
+    const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
@@ -36,7 +38,7 @@ function App() {
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
       });
-  }, [city]); // Empty dependency array ensures that this effect runs only once when the component mounts
+  }, [searchedCity]);
 
   return (
     <div className="block">
