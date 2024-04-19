@@ -18,8 +18,6 @@ import rainImage from './assets/rain.png'
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
-const cityApi = "http://api.openweathermap.org/geo/1.0/direct?q="
-
 function App() {
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
@@ -115,7 +113,6 @@ function App() {
   
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
-    const cityApiUrl = `${cityApi}${searchedCity}&limit=1&appid=${apiKey}`;
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
@@ -129,20 +126,8 @@ function App() {
         setWind(data.wind.speed.toFixed(1)  + " km/h");
         setCity(data.name);
         setWeatherStatus(data.weather[0].icon);
-      })
-      .catch(error => {
-        console.error('Chyba při získávání dat:', error);
-      });
-    fetch(cityApiUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setLong(data[0].lon);
-        setLat(data[0].lat);
+        setLong(data.coord.lon);
+        setLat(data.coord.lat)
       })
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
