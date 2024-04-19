@@ -37,17 +37,6 @@ body{
   font-size: 18px;
 }
 
-.search button{
-  border-style: solid;
-  border-color: #cfcfcf;
-  border-radius: 50%;
-  outline: 0;
-  background: rgba(150, 150, 150, 0.3) ;
-  height: 60px;
-  width: 60px;
-  cursor: pointer;
-}
-
 .search button img{
   width: 20px;
 }

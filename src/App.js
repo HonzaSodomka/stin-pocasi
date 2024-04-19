@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import sunImage from './assets/sun.png';
 import humidityImage from './assets/humidity.png';
 import windImage from './assets/wind.png';
-import searchImage from './assets/search.png';
 
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
@@ -43,7 +42,6 @@ function App() {
     <div className="block">
       <div className="search">
         <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
-        <button><img src={searchImage} alt="Hledat" /></button>
       </div>
       <div className="weather">
         <h2 className="city">{city}</h2>
