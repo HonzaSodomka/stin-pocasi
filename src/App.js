@@ -2,63 +2,65 @@ import React, { useState, useEffect } from 'react';
 import sunImage from './assets/sun.png';
 import humidityImage from './assets/humidity.png';
 import windImage from './assets/wind.png';
+import searchImage from './assets/search.png';
 
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
-const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
+const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
 function App() {
+  const [temperature, setTemperature] = useState("Loading...");
+  const [humidity, setHumidity] = useState("Loading...");
+  const [wind, setWind] = useState("Loading...");
   const [city, setCity] = useState("Praha");
-  const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  async function checkWeather(city) {
-    try {
-      setLoading(true);
-      const response = await fetch(apiUrl + city + `&appid=` + apiKey);
-      const data = await response.json();
-      setWeatherData(data);
-    } catch (error) {
-      console.error('Chyba při získávání dat o počasí:', error);
-    } finally {
-      setLoading(false);
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      setCity(event.target.value);
     }
-  }
-
+  };
+  
   useEffect(() => {
-    checkWeather(city);
-  }, []); // Prazdne pole zavislosti
-
-  const handleCityChange = (newCity) => {
-    setCity(newCity);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      checkWeather(city);
-    }
-  };
+    const apiUrl = `${apiAdress}${city}&appid=${apiKey}`;
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setTemperature(data.main.temp + " °C");
+        setHumidity(data.main.humidity + " %");
+        setWind(data.wind.speed + " km/h");
+        setCity(data.name)
+      })
+      .catch(error => {
+        console.error('Chyba při získávání dat:', error);
+      });
+  }, [city]); // Empty dependency array ensures that this effect runs only once when the component mounts
 
   return (
     <div className="block">
       <div className="search">
-        <input type="text" placeholder="Zadejte město" onChange={(e) => handleCityChange(e.target.value)} value={city} onKeyPress={handleKeyPress}></input>
+        <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
+        <button><img src={searchImage} alt="Hledat" /></button>
       </div>
       <div className="weather">
-        <h2 className="city">{weatherData ? weatherData.name : 'Praha'}</h2>
+        <h2 className="city">{city}</h2>
         <img src={sunImage} className="weather-icon" alt=""></img>
-        <h1 className="temp">{loading ? 'Načítání...' : (weatherData ? `${weatherData.main.temp.toFixed(1)}°C` : 'N/A')}</h1>
+        <h1 className="temp">{temperature}</h1>
         <div className="details">
           <div className="col">
             <img src={humidityImage} alt=""></img>
             <div>
-              <p className="humidity">{loading ? 'Načítání...' : (weatherData ? `${weatherData.main.humidity}%` : 'N/A')}</p>
+              <p className="humidity">{humidity}</p>
               <p>Vlhkost</p>
             </div>
           </div>
           <div className="col">
             <img src={windImage} alt=""></img>
             <div>
-              <p className="wind">{loading ? 'Načítání...' : (weatherData ? `${weatherData.wind.speed.toFixed(1)} km/h` : 'N/A')}</p>
+              <p className="wind">{wind}</p>
               <p className="desc">Rychlost větru</p>
             </div>
           </div>
