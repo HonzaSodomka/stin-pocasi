@@ -18,13 +18,45 @@ import rainImage from './assets/rain.png'
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
+const cityApi = "http://api.openweathermap.org/geo/1.0/direct?q="
+
+const historyApi = "https://archive-api.open-meteo.com/v1/archive?"
+
 function App() {
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
   const [wind, setWind] = useState("Loading...");
   const [city, setCity] = useState("Praha");
   const [searchedCity, setSearchedCity] = useState("Praha");
-  const [weatherImage, setWeatherImage] = useState({sunImage})
+  const [weatherImage, setWeatherImage] = useState({sunImage});
+  const [long, setLong] = useState("");
+  const [lat, setLat] = useState("");
+
+
+  var d = new Date()
+  var dOneDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dOneMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dOneYear = d.getFullYear(d.setDate(d.getDate()))
+  var dTwoDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dTwoMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dTwoYear = d.getFullYear(d.setDate(d.getDate()))
+  var dThreeDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dThreeMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dThreeYear = d.getFullYear(d.setDate(d.getDate()))
+  var dFourDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dFourMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dFourYear = d.getFullYear(d.setDate(d.getDate()))
+  var dFiveDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dFiveMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dFiveYear = d.getFullYear(d.setDate(d.getDate()))
+  var dSixDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dSixMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dSixYear = d.getFullYear(d.setDate(d.getDate()))
+  var dSevenDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dSevenMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dSevenYear = d.getFullYear(d.setDate(d.getDate()))
+
+
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -85,6 +117,8 @@ function App() {
   
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
+    const cityApiUrl = `${cityApi}${searchedCity}&limit=1&appid=${apiKey}`;
+    const historyApiUrl = `${historyApi}latitude=${lat}&longtitude=${long}&start_date=2024-04-13&end_date=2024-04-13&hourly=temperature_2m,rain,snowfall,cloud_cover`;
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
@@ -98,6 +132,20 @@ function App() {
         setWind(data.wind.speed.toFixed(1)  + " km/h");
         setCity(data.name);
         setWeatherStatus(data.weather[0].icon);
+      })
+      .catch(error => {
+        console.error('Chyba při získávání dat:', error);
+      });
+    fetch(cityApiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setLong(data[0].lon);
+        setLat(data[0].lat);
       })
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
@@ -132,7 +180,72 @@ function App() {
           </div>
         </div>
       </div>
+      <div className = "history">
+      <table border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Highest temp</th>
+                <th>Lowest temp</th>
+                <th>Rain</th>
+                <th>Clouds</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{dOneDay}.{dOneMonth}.{dOneYear}</td>
+                <td>Řádek 1, Sloupec 2</td>
+                <td>Řádek 1, Sloupec 3</td>
+                <td>Řádek 1, Sloupec 4</td>
+                <td>Řádek 1, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dTwoDay}.{dTwoMonth}.{dTwoYear}</td>
+                <td>Řádek 2, Sloupec 2</td>
+                <td>Řádek 2, Sloupec 3</td>
+                <td>Řádek 2, Sloupec 4</td>
+                <td>Řádek 2, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dThreeDay}.{dThreeMonth}.{dThreeYear}</td>
+                <td>Řádek 3, Sloupec 2</td>
+                <td>Řádek 3, Sloupec 3</td>
+                <td>Řádek 3, Sloupec 4</td>
+                <td>Řádek 3, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dFourDay}.{dFourMonth}.{dFourYear}</td>
+                <td>Řádek 4, Sloupec 2</td>
+                <td>Řádek 4, Sloupec 3</td>
+                <td>Řádek 4, Sloupec 4</td>
+                <td>Řádek 4, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dFiveDay}.{dFiveMonth}.{dFiveYear}</td>
+                <td>Řádek 5, Sloupec 2</td>
+                <td>Řádek 5, Sloupec 3</td>
+                <td>Řádek 5, Sloupec 4</td>
+                <td>Řádek 5, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dSixDay}.{dSixMonth}.{dSixYear}</td>
+                <td>Řádek 6, Sloupec 2</td>
+                <td>Řádek 6, Sloupec 3</td>
+                <td>Řádek 6, Sloupec 4</td>
+                <td>Řádek 6, Sloupec 5</td>
+            </tr>
+            <tr>
+                <td>{dSevenDay}.{dSevenMonth}.{dSevenYear}</td>
+                <td>Řádek 7, Sloupec 2</td>
+                <td>Řádek 7, Sloupec 3</td>
+                <td>Řádek 7, Sloupec 4</td>
+                <td>Řádek 7, Sloupec 5</td>
+            </tr>
+        </tbody>
+    </table>
+      </div>
     </div>
+    
   );
 }
 
