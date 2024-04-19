@@ -47,25 +47,28 @@ function App() {
       case "02n":
         setWeatherImage(fewCloudsNImage);
         break;
-      case "04d", "04n":
+      case "04d":
+      case "04n":
         setWeatherImage(brokenCloudsImage);
         break;
-      case "02d":
-        setWeatherImage(fewCloudsImage);
-        break;
-      case "50d", "50n":
+      case "50d":
+      case "50n":
         setWeatherImage(mistImage);
         break;
-      case "03d", "03n":
+      case "03d":
+      case "03n":
         setWeatherImage(scatteredCloudsImage);
         break;
-      case "09d", "09n":
+      case "09d":
+      case "09n":
         setWeatherImage(showerRainImage);
         break;
-      case "13d", "13n":
+      case "13d":
+      case "13n":
         setWeatherImage(snowImage);
         break;
-      case "11d", "11n":
+      case "11d":
+      case "11n":
         setWeatherImage(thunderstormImage);
         break;
       case "10d":
