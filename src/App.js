@@ -165,7 +165,7 @@ function App() {
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
       });
-  }, [long, lat]);
+  }, [long, lat, dOneDay, dOneMonth, dOneYear, dSevenDay, dSevenMonth, dSevenYear]);
 
  
 
