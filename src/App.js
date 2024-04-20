@@ -18,6 +18,11 @@ import rainImage from './assets/rain.png'
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
+const historyApi = "https://api.open-meteo.com/v1/forecast?"
+const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,snowfall_sum&timezone=auto&"
+
+
+
 function App() {
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
@@ -27,29 +32,35 @@ function App() {
   const [weatherImage, setWeatherImage] = useState({sunImage});
   const [long, setLong] = useState("");
   const [lat, setLat] = useState("");
+  const [maxTemp, setMaxTemp] = useState("");
+  const [minTemp, setMinTemp] = useState("");
+  const [precipitation, setPrecipitation] = useState("")
+  const [rain, setRain] = useState("")
+  const [shower, setShower] = useState("")
+  const [snow, setSnow] = useState("")
 
 
   var d = new Date()
   var dOneDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dOneMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dOneMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dOneYear = d.getFullYear(d.setDate(d.getDate()))
   var dTwoDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dTwoMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dTwoMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dTwoYear = d.getFullYear(d.setDate(d.getDate()))
   var dThreeDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dThreeMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dThreeMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dThreeYear = d.getFullYear(d.setDate(d.getDate()))
   var dFourDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dFourMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dFourMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dFourYear = d.getFullYear(d.setDate(d.getDate()))
   var dFiveDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dFiveMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dFiveMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dFiveYear = d.getFullYear(d.setDate(d.getDate()))
   var dSixDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dSixMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dSixMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSixYear = d.getFullYear(d.setDate(d.getDate()))
   var dSevenDay = d.getDate(d.setDate(d.getDate() - 1))
-  var dSevenMonth = d.getMonth(d.setDate(d.getDate()))+1
+  var dSevenMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSevenYear = d.getFullYear(d.setDate(d.getDate()))
 
 
@@ -100,10 +111,10 @@ function App() {
         setWeatherImage(thunderstormImage);
         break;
       case "10d":
-        setWeatherImage(rainImage)
+        setWeatherImage(rainImage);
         break;
       case "10n":
-        setWeatherImage(rainNImage)
+        setWeatherImage(rainNImage);
         break;
       default:
         setWeatherImage(sunImage);
@@ -127,12 +138,34 @@ function App() {
         setCity(data.name);
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
-        setLat(data.coord.lat)
+        setLat(data.coord.lat);
       })
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
       });
   }, [searchedCity]);
+
+  useEffect(() => {
+  const historyApiUrl = `${historyApi}latitude=${lat}&longitude=${long}${historyApiSet}start_date=${dSevenYear}-${dSevenMonth}-${dSevenDay}&end_date=${dOneYear}-${dOneMonth}-${dOneDay}`
+    fetch(historyApiUrl)
+      .then(historyResponse => {
+        if (!historyResponse.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return historyResponse.json();
+      })
+      .then(historyData => {
+        setMaxTemp(historyData.daily.temperature_2m_max);
+        setMinTemp(historyData.daily.temperature_2m_min);
+        setPrecipitation(historyData.daily.precipitation_sum)
+        setRain(historyData.daily.rain_sum)
+        setShower(historyData.daily.showers_sum)
+        setSnow(historyData.daily.snowfall_sum)
+      })
+      .catch(error => {
+        console.error('Chyba při získávání dat:', error);
+      });
+  }, [long, lat]);
 
  
 
@@ -163,65 +196,57 @@ function App() {
         </div>
       </div>
       <div className = "history">
-      <table border="1">
+      <table className = "historyTable" border="1">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Highest temp</th>
-                <th>Lowest temp</th>
-                <th>Rain</th>
-                <th>Clouds</th>
+                <th className = "date">Datum</th>
+                <th className="hiTemp">Max. teplota</th>
+                <th className="loTemp">Min. teplota</th>
+                <th className="rain">Srážky</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>{dOneDay}.{dOneMonth}.{dOneYear}</td>
-                <td>{long}</td>
-                <td>{lat}</td>
-                <td>Řádek 1, Sloupec 4</td>
-                <td>Řádek 1, Sloupec 5</td>
+                <td>{maxTemp[6]} °C</td>
+                <td>{minTemp[6]} °C</td>
+                <td>{(precipitation[6] + rain[6] + shower[6] + snow[6]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dTwoDay}.{dTwoMonth}.{dTwoYear}</td>
-                <td>Řádek 2, Sloupec 2</td>
-                <td>Řádek 2, Sloupec 3</td>
-                <td>Řádek 2, Sloupec 4</td>
-                <td>Řádek 2, Sloupec 5</td>
+                <td>{maxTemp[5]} °C</td>
+                <td>{minTemp[5]} °C</td>
+                <td>{(precipitation[5] + rain[5] + shower[5] + snow[5]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dThreeDay}.{dThreeMonth}.{dThreeYear}</td>
-                <td>Řádek 3, Sloupec 2</td>
-                <td>Řádek 3, Sloupec 3</td>
-                <td>Řádek 3, Sloupec 4</td>
-                <td>Řádek 3, Sloupec 5</td>
+                <td>{maxTemp[4]} °C</td>
+                <td>{minTemp[4]} °C</td>
+                <td>{(precipitation[4] + rain[4] + shower[4] + snow[4]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dFourDay}.{dFourMonth}.{dFourYear}</td>
-                <td>Řádek 4, Sloupec 2</td>
-                <td>Řádek 4, Sloupec 3</td>
-                <td>Řádek 4, Sloupec 4</td>
-                <td>Řádek 4, Sloupec 5</td>
+                <td>{maxTemp[3]} °C</td>
+                <td>{minTemp[3]} °C</td>
+                <td>{(precipitation[3] + rain[3] + shower[3] + snow[3]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dFiveDay}.{dFiveMonth}.{dFiveYear}</td>
-                <td>Řádek 5, Sloupec 2</td>
-                <td>Řádek 5, Sloupec 3</td>
-                <td>Řádek 5, Sloupec 4</td>
-                <td>Řádek 5, Sloupec 5</td>
+                <td>{maxTemp[2]} °C</td>
+                <td>{minTemp[2]} °C</td>
+                <td>{(precipitation[2] + rain[2] + shower[2] + snow[2]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dSixDay}.{dSixMonth}.{dSixYear}</td>
-                <td>Řádek 6, Sloupec 2</td>
-                <td>Řádek 6, Sloupec 3</td>
-                <td>Řádek 6, Sloupec 4</td>
-                <td>Řádek 6, Sloupec 5</td>
+                <td>{maxTemp[1]} °C</td>
+                <td>{minTemp[1]} °C</td>
+                <td>{(precipitation[1] + rain[1] + shower[1] + snow[1]).toFixed(1)} mm</td>
             </tr>
             <tr>
                 <td>{dSevenDay}.{dSevenMonth}.{dSevenYear}</td>
-                <td>Řádek 7, Sloupec 2</td>
-                <td>Řádek 7, Sloupec 3</td>
-                <td>Řádek 7, Sloupec 4</td>
-                <td>Řádek 7, Sloupec 5</td>
+                <td>{maxTemp[0]} °C</td>
+                <td>{minTemp[0]} °C</td>
+                <td>{(precipitation[0] + rain[0] + shower[0] + snow[0]).toFixed(1)} mm</td>
             </tr>
         </tbody>
     </table>

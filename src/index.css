@@ -80,3 +80,23 @@ body{
   padding-right: 10px;
 }
 
+.historyTable{
+  margin:0 auto;
+  margin-top: 20px;
+}
+
+.historyTable .date{
+  column-width: 120px;
+}
+
+.historyTable .loTemp{
+  column-width: 120px;
+}
+
+.historyTable .hiTemp{
+  column-width: 120px;
+}
+
+.historyTable .rain{
+  column-width: 120px;
+}
