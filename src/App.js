@@ -88,15 +88,15 @@ function App() {
     const validInput = document.getElementById('validity');
     const cvcInput = document.getElementById('cvc');
 
-    if (cardInput.value.length != 19){
+    if (cardInput.value.length !== 19){
       alert("Zadejte číslo karty ve formátu XXXX XXXX XXXX XXXX.")
     }
 
-    else if (validInput.value.length != 5){
+    else if (validInput.value.length !== 5){
       alert("Zadejte platnost karty ve formátu MM/YY.")
     }
 
-    else if (cvcInput.value.length != 3){
+    else if (cvcInput.value.length !== 3){
       alert("Zadejte CVC ve formátu XXX.")
     }
     else{
@@ -347,7 +347,7 @@ function App() {
     </table>
   </div>
 
-  if (user == "") {
+  if (user === "") {
     return (
       <div className="block">
         {head}
