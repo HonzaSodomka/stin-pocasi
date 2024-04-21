@@ -106,7 +106,10 @@ function App() {
   }
 
   const login = <div className="head">
+    <div className="text">
     Pro prémiové služby* se prosím přihlaste:
+    </div>
+    <div className="log">
     <div className="inputs">
       <input type="text" id="username" placeholder="Uživatelské jméno"></input>
       <input type="password" id="password" placeholder="Heslo"></input>
@@ -114,6 +117,7 @@ function App() {
     <div className="buttons">
       <button onClick={handleLogin}>Přihlásit se</button>
       <button onClick={handleRegistration}>Registrovat</button>
+    </div>
     </div>
   </div>
 
