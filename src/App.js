@@ -13,6 +13,7 @@ import moonImage from './assets/moon.png'
 import fewCloudsNImage from './assets/fewcloudsn.png'
 import rainNImage from './assets/rainn.png'
 import rainImage from './assets/rain.png'
+import usersData from './users.json';
 
 
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
@@ -24,12 +25,134 @@ const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitatio
 
 
 function App() {
+  const handleRegistration = () => {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    const username = usernameInput.value;
+    const userExists = usersData.users.find(user => user.username === username);
+
+    if (userExists) {
+      alert('Uživatelské jméno již existuje. Přihlaste se nebo zvolte jiné.');
+    }
+
+    else if (usernameInput.value.length < 4){
+      alert("Uživatelské jméno musí být dlouhé alespoň 4 znaky.")
+    }
+    else if (passwordInput.value.length < 5){
+      alert("Heslo musí být dlouhé alespoň 5 znaků.")
+    }
+    else {
+      usernameInput.value = '';
+      passwordInput.value = '';
+      setHead(payment);
+    }
+  };
+
+  const handleLogin = () => {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    const username = usernameInput.value;
+    const userExists = usersData.users.find(user => user.username === username);
+
+    const password = passwordInput.value;
+    const passwordMatch = usersData.users.find(user => user.username === username && user.password === password)
+
+    const pay = usersData.users.find(user => user.username === username && user.password === password && user.pay === "yes")
+
+    if (userExists && passwordMatch && pay) {
+      setUser("valid")
+      setHead(logout)
+    }
+    else if (userExists && passwordMatch) {
+      usernameInput.value = '';
+      passwordInput.value = '';
+      setHead(payment)
+    } 
+    else if (userExists) {
+      alert("Špatně zadané heslo.")
+    }
+    else {
+      alert("Uživatelské jméno neexistuje nebo je špatně zadané")
+    }
+  };
+
+  const handleLogout = () => {
+    setUser("")
+    setHead(login)
+  }
+
+  const handlePayment = () => {
+    const cardInput = document.getElementById('cardnumber');
+    const validInput = document.getElementById('validity');
+    const cvcInput = document.getElementById('cvc');
+
+    if (cardInput.value.length !== 19){
+      alert("Zadejte číslo karty ve formátu XXXX XXXX XXXX XXXX.")
+    }
+
+    else if (validInput.value.length !== 5){
+      alert("Zadejte platnost karty ve formátu MM/YY.")
+    }
+
+    else if (cvcInput.value.length !== 3){
+      alert("Zadejte CVC ve formátu XXX.")
+    }
+    else{
+    setUser("valid")
+    setHead(logout)
+  }
+  }
+
+  const login = <div className="head">
+    Pro prémiové služby* se prosím přihlaste:
+    <div className="inputs">
+      <input type="text" id="username" placeholder="Uživatelské jméno"></input>
+      <input type="password" id="password" placeholder="Heslo"></input>
+    </div>
+    <div className="buttons">
+      <button onClick={handleLogin}>Přihlásit se</button>
+      <button onClick={handleRegistration}>Registrovat</button>
+    </div>
+  </div>
+
+  const [head, setHead] = useState(login);
+
+  const payment = (
+    <div className="payment">
+      <div className="number">
+        <input type="text" id="cardnumber" placeholder="Číslo karty"></input>
+      </div>
+      <div>
+        <input type="text" id="validity" placeholder="Platnost karty"></input>
+        <input type="text" id="cvc" placeholder="CVC"></input>
+        <button onClick={handlePayment}>Zaplatit</button>
+      </div>
+    </div>
+  );
+
+  const premium = (
+    <div className="bot">
+      *Prémiovými službami se rozumí zobrazení historie počasí 7 dní zpátky a možnost ukládat si oblíbená místa. Při registraci je vyžadován jednorázový poplatek 99 Kč.
+    </div>
+  );
+
+  const logout = (
+    <div className="logout">
+    <button onClick={handleLogout}>Odhlásit</button>
+    </div>
+  )
+
+
+
+
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
   const [wind, setWind] = useState("Loading...");
   const [city, setCity] = useState("Praha");
   const [searchedCity, setSearchedCity] = useState("Praha");
-  const [weatherImage, setWeatherImage] = useState({sunImage});
+  const [weatherImage, setWeatherImage] = useState({ sunImage });
   const [long, setLong] = useState("");
   const [lat, setLat] = useState("");
   const [maxTemp, setMaxTemp] = useState("");
@@ -39,6 +162,7 @@ function App() {
   const [shower, setShower] = useState("")
   const [snow, setSnow] = useState("")
 
+  const [user, setUser] = useState("")
 
   var d = new Date()
   var dOneDay = d.getDate(d.setDate(d.getDate() - 1))
@@ -62,7 +186,6 @@ function App() {
   var dSevenDay = d.getDate(d.setDate(d.getDate() - 1))
   var dSevenMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSevenYear = d.getFullYear(d.setDate(d.getDate()))
-
 
 
   const handleKeyDown = (event) => {
@@ -121,7 +244,7 @@ function App() {
         break;
     }
   };
-  
+
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
     fetch(apiUrl)
@@ -132,9 +255,9 @@ function App() {
         return response.json();
       })
       .then(data => {
-        setTemperature(data.main.temp.toFixed(1)  + " °C");
-        setHumidity(data.main.humidity+ " %");
-        setWind(data.wind.speed.toFixed(1)  + " km/h");
+        setTemperature(data.main.temp.toFixed(1) + " °C");
+        setHumidity(data.main.humidity + " %");
+        setWind(data.wind.speed.toFixed(1) + " km/h");
         setCity(data.name);
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
@@ -146,7 +269,7 @@ function App() {
   }, [searchedCity]);
 
   useEffect(() => {
-  const historyApiUrl = `${historyApi}latitude=${lat}&longitude=${long}${historyApiSet}start_date=${dSevenYear}-${dSevenMonth}-${dSevenDay}&end_date=${dOneYear}-${dOneMonth}-${dOneDay}`
+    const historyApiUrl = `${historyApi}latitude=${lat}&longitude=${long}${historyApiSet}start_date=${dSevenYear}-${dSevenMonth}-${dSevenDay}&end_date=${dOneYear}-${dOneMonth}-${dOneDay}`
     fetch(historyApiUrl)
       .then(historyResponse => {
         if (!historyResponse.ok) {
@@ -167,93 +290,127 @@ function App() {
       });
   }, [long, lat, dOneDay, dOneMonth, dOneYear, dSevenDay, dSevenMonth, dSevenYear]);
 
- 
+  var table = <div className="history">
+    <table className="historyTable" border="1">
+      <thead>
+        <tr>
+          <th className="date">Datum</th>
+          <th className="hiTemp">Max. teplota</th>
+          <th className="loTemp">Min. teplota</th>
+          <th className="rain">Srážky</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{dOneDay}.{dOneMonth}.{dOneYear}</td>
+          <td>{maxTemp[6]} °C</td>
+          <td>{minTemp[6]} °C</td>
+          <td>{(precipitation[6] + rain[6] + shower[6] + snow[6]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dTwoDay}.{dTwoMonth}.{dTwoYear}</td>
+          <td>{maxTemp[5]} °C</td>
+          <td>{minTemp[5]} °C</td>
+          <td>{(precipitation[5] + rain[5] + shower[5] + snow[5]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dThreeDay}.{dThreeMonth}.{dThreeYear}</td>
+          <td>{maxTemp[4]} °C</td>
+          <td>{minTemp[4]} °C</td>
+          <td>{(precipitation[4] + rain[4] + shower[4] + snow[4]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dFourDay}.{dFourMonth}.{dFourYear}</td>
+          <td>{maxTemp[3]} °C</td>
+          <td>{minTemp[3]} °C</td>
+          <td>{(precipitation[3] + rain[3] + shower[3] + snow[3]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dFiveDay}.{dFiveMonth}.{dFiveYear}</td>
+          <td>{maxTemp[2]} °C</td>
+          <td>{minTemp[2]} °C</td>
+          <td>{(precipitation[2] + rain[2] + shower[2] + snow[2]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dSixDay}.{dSixMonth}.{dSixYear}</td>
+          <td>{maxTemp[1]} °C</td>
+          <td>{minTemp[1]} °C</td>
+          <td>{(precipitation[1] + rain[1] + shower[1] + snow[1]).toFixed(1)} mm</td>
+        </tr>
+        <tr>
+          <td>{dSevenDay}.{dSevenMonth}.{dSevenYear}</td>
+          <td>{maxTemp[0]} °C</td>
+          <td>{minTemp[0]} °C</td>
+          <td>{(precipitation[0] + rain[0] + shower[0] + snow[0]).toFixed(1)} mm</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  return (
-    <div className="block">
-      <div className="search">
-        <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
-      </div>
-      <div className="weather">
-        <h2 className="city">{city}</h2>
-        <img src={weatherImage} className="weather-icon" alt=""></img>
-        <h1 className="temp">{temperature}</h1>
-        <div className="details">
-          <div className="col">
-            <img src={humidityImage} alt=""></img>
-            <div>
-              <p className="humidity">{humidity}</p>
-              <p>Vlhkost</p>
+  if (user === "") {
+    return (
+      <div className="block">
+        {head}
+        <div className="search">
+          <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
+        </div>
+        <div className="weather">
+          <h2 className="city">{city}</h2>
+          <img src={weatherImage} className="weather-icon" alt=""></img>
+          <h1 className="temp">{temperature}</h1>
+          <div className="details">
+            <div className="col">
+              <img src={humidityImage} alt=""></img>
+              <div>
+                <p className="humidity">{humidity}</p>
+                <p>Vlhkost</p>
+              </div>
             </div>
-          </div>
-          <div className="col">
-            <img src={windImage} alt=""></img>
-            <div>
-              <p className="wind">{wind}</p>
-              <p className="desc">Rychlost větru</p>
+            <div className="col">
+              <img src={windImage} alt=""></img>
+              <div>
+                <p className="wind">{wind}</p>
+                <p className="desc">Rychlost větru</p>
+              </div>
             </div>
           </div>
         </div>
+        {premium}
       </div>
-      <div className = "history">
-      <table className = "historyTable" border="1">
-        <thead>
-            <tr>
-                <th className = "date">Datum</th>
-                <th className="hiTemp">Max. teplota</th>
-                <th className="loTemp">Min. teplota</th>
-                <th className="rain">Srážky</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{dOneDay}.{dOneMonth}.{dOneYear}</td>
-                <td>{maxTemp[6]} °C</td>
-                <td>{minTemp[6]} °C</td>
-                <td>{(precipitation[6] + rain[6] + shower[6] + snow[6]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dTwoDay}.{dTwoMonth}.{dTwoYear}</td>
-                <td>{maxTemp[5]} °C</td>
-                <td>{minTemp[5]} °C</td>
-                <td>{(precipitation[5] + rain[5] + shower[5] + snow[5]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dThreeDay}.{dThreeMonth}.{dThreeYear}</td>
-                <td>{maxTemp[4]} °C</td>
-                <td>{minTemp[4]} °C</td>
-                <td>{(precipitation[4] + rain[4] + shower[4] + snow[4]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dFourDay}.{dFourMonth}.{dFourYear}</td>
-                <td>{maxTemp[3]} °C</td>
-                <td>{minTemp[3]} °C</td>
-                <td>{(precipitation[3] + rain[3] + shower[3] + snow[3]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dFiveDay}.{dFiveMonth}.{dFiveYear}</td>
-                <td>{maxTemp[2]} °C</td>
-                <td>{minTemp[2]} °C</td>
-                <td>{(precipitation[2] + rain[2] + shower[2] + snow[2]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dSixDay}.{dSixMonth}.{dSixYear}</td>
-                <td>{maxTemp[1]} °C</td>
-                <td>{minTemp[1]} °C</td>
-                <td>{(precipitation[1] + rain[1] + shower[1] + snow[1]).toFixed(1)} mm</td>
-            </tr>
-            <tr>
-                <td>{dSevenDay}.{dSevenMonth}.{dSevenYear}</td>
-                <td>{maxTemp[0]} °C</td>
-                <td>{minTemp[0]} °C</td>
-                <td>{(precipitation[0] + rain[0] + shower[0] + snow[0]).toFixed(1)} mm</td>
-            </tr>
-        </tbody>
-    </table>
+    );
+  }
+  else {
+    return (
+      <div className="block">
+        {head}
+        <div className="search">
+          <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
+        </div>
+        <div className="weather">
+          <h2 className="city">{city}</h2>
+          <img src={weatherImage} className="weather-icon" alt=""></img>
+          <h1 className="temp">{temperature}</h1>
+          <div className="details">
+            <div className="col">
+              <img src={humidityImage} alt=""></img>
+              <div>
+                <p className="humidity">{humidity}</p>
+                <p>Vlhkost</p>
+              </div>
+            </div>
+            <div className="col">
+              <img src={windImage} alt=""></img>
+              <div>
+                <p className="wind">{wind}</p>
+                <p className="desc">Rychlost větru</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {table}
       </div>
-    </div>
-    
-  );
+    );
+  }
 }
 
 export default App;
