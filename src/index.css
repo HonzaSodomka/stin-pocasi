@@ -130,19 +130,19 @@ body{
 .head input{
   border-style: solid;
   border-color: #cfcfcf;
-  border-radius: 10px;
+  border-radius: 20px;
   outline: 0;
   background: rgba(150, 150, 150, 0.3) ;
   color:#ffffff;
   padding-left: 2vmin;
   padding-top: 1vmin;
   padding-bottom: 1vmin;
-  height: 6px;
+  height: 3vmin;
   width: 25vmin;
   flex: 1;
   margin-left: 20px;
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 2vmin;
 }
 
 .head button {
@@ -152,7 +152,8 @@ body{
   outline: 0;
   background: rgba(150, 150, 150, 0.3);
   color:white;
-  margin-bottom: 2vmin;
+  margin-top: 1vmin;
+  margin-bottom: 3vmin;
   margin-right: 10vmin;
 }
 
@@ -181,7 +182,7 @@ body{
   width: 80vw;
   max-width: 400px;
   align-items: center;
-  font-size: 16px;
+  font-size: 2vmin;
 }
 
 .payment .number {
@@ -198,7 +199,7 @@ body{
   height: 25px;
   width: 15vmin;
   max-width: 150px;
-  font-size: 16px;
+  font-size: 2vmin;
 }
 
 .payment button {
