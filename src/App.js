@@ -15,7 +15,7 @@ import rainNImage from './assets/rainn.png'
 import rainImage from './assets/rain.png'
 import usersData from './users.json';
 
-
+var userName = "";
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
@@ -25,6 +25,22 @@ const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitatio
 
 
 function App() {
+
+  const [favorites, setFavorites] = useState(""); // Stav pro uložení vygenerovaného select elementu
+
+  const setFavs = () => {
+    const user = usersData.users.find(user => user.username === userName);
+    const favorites = user.favorites;
+    const options = favorites.map(item => <option key={item}>{item}</option>);
+    const selectElement = (
+      <select>
+        <option>---</option>
+        {options}
+      </select>
+    );
+    setFavorites(selectElement);
+  }
+
   const handleRegistration = () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -36,13 +52,14 @@ function App() {
       alert('Uživatelské jméno již existuje. Přihlaste se nebo zvolte jiné.');
     }
 
-    else if (usernameInput.value.length < 4){
+    else if (usernameInput.value.length < 4) {
       alert("Uživatelské jméno musí být dlouhé alespoň 4 znaky.")
     }
-    else if (passwordInput.value.length < 5){
+    else if (passwordInput.value.length < 5) {
       alert("Heslo musí být dlouhé alespoň 5 znaků.")
     }
     else {
+      userName = usernameInput.value;
       usernameInput.value = '';
       passwordInput.value = '';
       setHead(payment);
@@ -62,14 +79,17 @@ function App() {
     const pay = usersData.users.find(user => user.username === username && user.password === password && user.pay === "yes")
 
     if (userExists && passwordMatch && pay) {
+      userName = usernameInput.value;
       setUser("valid")
       setHead(logout)
+      setFavorites(setFavs);
     }
     else if (userExists && passwordMatch) {
+      userName = usernameInput.value;
       usernameInput.value = '';
       passwordInput.value = '';
       setHead(payment)
-    } 
+    }
     else if (userExists) {
       alert("Špatně zadané heslo.")
     }
@@ -79,6 +99,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    userName = ""
     setUser("")
     setHead(login)
   }
@@ -88,36 +109,36 @@ function App() {
     const validInput = document.getElementById('validity');
     const cvcInput = document.getElementById('cvc');
 
-    if (cardInput.value.length !== 19){
+    if (cardInput.value.length !== 19) {
       alert("Zadejte číslo karty ve formátu XXXX XXXX XXXX XXXX.")
     }
 
-    else if (validInput.value.length !== 5){
+    else if (validInput.value.length !== 5) {
       alert("Zadejte platnost karty ve formátu MM/YY.")
     }
 
-    else if (cvcInput.value.length !== 3){
+    else if (cvcInput.value.length !== 3) {
       alert("Zadejte CVC ve formátu XXX.")
     }
-    else{
-    setUser("valid")
-    setHead(logout)
-  }
+    else {
+      setUser("valid")
+      setHead(logout)
+    }
   }
 
   const login = <div className="head">
     <div className="text">
-    Pro prémiové služby* se prosím přihlaste:
+      Pro prémiové služby* se prosím přihlaste:
     </div>
     <div className="log">
-    <div className="inputs">
-      <input type="text" id="username" placeholder="Uživatelské jméno"></input>
-      <input type="password" id="password" placeholder="Heslo"></input>
-    </div>
-    <div className="buttons">
-      <button onClick={handleLogin}>Přihlásit se</button>
-      <button onClick={handleRegistration}>Registrovat</button>
-    </div>
+      <div className="inputs">
+        <input type="text" id="username" placeholder="Uživatelské jméno"></input>
+        <input type="password" id="password" placeholder="Heslo"></input>
+      </div>
+      <div className="buttons">
+        <button onClick={handleLogin}>Přihlásit se</button>
+        <button onClick={handleRegistration}>Registrovat</button>
+      </div>
     </div>
   </div>
 
@@ -136,6 +157,7 @@ function App() {
     </div>
   );
 
+
   const premium = (
     <div className="bot">
       *Prémiovými službami se rozumí zobrazení historie počasí 7 dní zpátky a možnost ukládat si oblíbená místa. Při registraci je vyžadován jednorázový poplatek 99 Kč.
@@ -144,12 +166,9 @@ function App() {
 
   const logout = (
     <div className="logout">
-    <button onClick={handleLogout}>Odhlásit</button>
+      <button onClick={handleLogout}>Odhlásit</button>
     </div>
   )
-
-
-
 
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
@@ -389,6 +408,9 @@ function App() {
         {head}
         <div className="search">
           <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
+          <div className="favs">
+          {favorites}
+          </div>
         </div>
         <div className="weather">
           <h2 className="city">{city}</h2>
