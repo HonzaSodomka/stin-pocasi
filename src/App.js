@@ -13,7 +13,6 @@ import moonImage from './assets/moon.png'
 import fewCloudsNImage from './assets/fewcloudsn.png'
 import rainNImage from './assets/rainn.png'
 import rainImage from './assets/rain.png'
-import usersData from './users.json';
 
 var userName = "";
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
@@ -23,9 +22,8 @@ const historyApi = "https://api.open-meteo.com/v1/forecast?"
 const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,snowfall_sum&timezone=auto&"
 
 
-
 function App() {
-
+  const usersData = require('./users.json')
   const [favorites, setFavorites] = useState(""); // Stav pro uložení vygenerovaného select elementu
 
   const setFavs = () => {
@@ -63,6 +61,7 @@ function App() {
       usernameInput.value = '';
       passwordInput.value = '';
       setHead(payment);
+      setFavorites(setFavs);
     }
   };
 
@@ -173,8 +172,8 @@ function App() {
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
   const [wind, setWind] = useState("Loading...");
-  const [city, setCity] = useState("Praha");
-  const [searchedCity, setSearchedCity] = useState("Praha");
+  const [city, setCity] = useState("Liberec");
+  const [searchedCity, setSearchedCity] = useState("Liberec");
   const [weatherImage, setWeatherImage] = useState({ sunImage });
   const [long, setLong] = useState("");
   const [lat, setLat] = useState("");
