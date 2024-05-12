@@ -53,6 +53,7 @@ function App() {
         password: passwordInput.value,
         pay: "no"
       });
+      console.log(response)
       setHead(payment);
       setFavorites("---");
     } catch (error) {
@@ -77,7 +78,7 @@ function App() {
       setHead(logout);
       const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
       const favorites = response.data;
-      const userFavorites = favorites.filter(favorite => favorite.user_id == passwordMatch.id);
+      const userFavorites = favorites.filter(favorite => favorite.user_id === passwordMatch.id);
       const cityNames = ["---", ...userFavorites.map(item => item.city)];
        const selectOptions = cityNames.map(city => <option key={city}>{city}</option>);
        const selectElement = (
@@ -305,7 +306,7 @@ function App() {
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
       });
-  }, [searchedCity]);
+  }, [searchedCity, user, usersData.users]);
 
 
   useEffect(() => {
@@ -432,7 +433,7 @@ function App() {
           </div>
         </div>
         <div className="weather">
-          <h2 className="city">{city}</h2>
+          <h2 className="city">userId {city}</h2>
           <img src={weatherImage} className="weather-icon" alt=""></img>
           <h1 className="temp">{temperature}</h1>
           <div className="details">
