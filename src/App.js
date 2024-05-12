@@ -433,7 +433,7 @@ function App() {
           </div>
         </div>
         <div className="weather">
-          <h2 className="city">userId {city}</h2>
+          <h2 className="city">{userId} {city}</h2>
           <img src={weatherImage} className="weather-icon" alt=""></img>
           <h1 className="temp">{temperature}</h1>
           <div className="details">
