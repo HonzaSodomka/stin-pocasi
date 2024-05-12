@@ -13,6 +13,9 @@ import moonImage from './assets/moon.png'
 import fewCloudsNImage from './assets/fewcloudsn.png'
 import rainNImage from './assets/rainn.png'
 import rainImage from './assets/rain.png'
+import favorite1 from './assets/favorite.png'
+import favorite2 from './assets/favorite2.png'
+import axios from 'axios';
 
 var userName = "";
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
@@ -24,32 +27,19 @@ const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitatio
 
 function App() {
   const usersData = require('./users.json')
-  const [favorites, setFavorites] = useState(""); // Stav pro uložení vygenerovaného select elementu
+  const [favorites, setFavorites] = useState("");
+  const [favoriteButton, setFavoriteButton] = useState("");
 
-  const setFavs = () => {
-    const user = usersData.users.find(user => user.username === userName);
-    const favorites = user.favorites;
-    const options = favorites.map(item => <option key={item}>{item}</option>);
-    const selectElement = (
-      <select>
-        <option>---</option>
-        {options}
-      </select>
-    );
-    setFavorites(selectElement);
-  }
-
-  const handleRegistration = () => {
+  const handleRegistration = async () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
-
     const username = usernameInput.value;
-    const userExists = usersData.users.find(user => user.username === username);
-
+    const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Users');
+    const userData = response.data;
+    const userExists = userData.find(user => user.username === username);
     if (userExists) {
       alert('Uživatelské jméno již existuje. Přihlaste se nebo zvolte jiné.');
     }
-
     else if (usernameInput.value.length < 4) {
       alert("Uživatelské jméno musí být dlouhé alespoň 4 znaky.")
     }
@@ -57,43 +47,58 @@ function App() {
       alert("Heslo musí být dlouhé alespoň 5 znaků.")
     }
     else {
-      userName = usernameInput.value;
-      usernameInput.value = '';
-      passwordInput.value = '';
+      try {
+      const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Users', {
+        username: usernameInput.value,
+        password: passwordInput.value,
+        pay: "no"
+      });
       setHead(payment);
-      setFavorites(setFavs);
+      setFavorites("---");
+    } catch (error) {
+      console.error('Chyba při vytváření uživatele:', error);
+      alert('Došlo k chybě při vytváření uživatele. Zkuste to prosím znovu.');
     }
-  };
+  };}
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
-
     const username = usernameInput.value;
-    const userExists = usersData.users.find(user => user.username === username);
-
     const password = passwordInput.value;
-    const passwordMatch = usersData.users.find(user => user.username === username && user.password === password)
-
-    const pay = usersData.users.find(user => user.username === username && user.password === password && user.pay === "yes")
-
+    const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Users');
+    const userData = response.data;
+    const userExists = userData.find(user => user.username === username);
+    const passwordMatch = userData.find(user => user.username === username && user.password === password)
+    const pay = userData.find(user => user.username === username && user.password === password && user.pay === "yes")
     if (userExists && passwordMatch && pay) {
-      userName = usernameInput.value;
-      setUser("valid")
-      setHead(logout)
-      setFavorites(setFavs);
-    }
+      userName = username;
+      setUser("valid");
+      setHead(logout);
+      const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
+      const favorites = response.data;
+      const userFavorites = favorites.filter(favorite => favorite.user_id == passwordMatch.id);
+      const cityNames = ["---", ...userFavorites.map(item => item.city)];
+       const selectOptions = cityNames.map(city => <option key={city}>{city}</option>);
+       const selectElement = (
+           <select>
+               {selectOptions}
+           </select>
+       );
+       setFavorites(selectElement);
+    } 
     else if (userExists && passwordMatch) {
-      userName = usernameInput.value;
-      usernameInput.value = '';
-      passwordInput.value = '';
-      setHead(payment)
-    }
-    else if (userExists) {
-      alert("Špatně zadané heslo.")
-    }
+      userName = username;
+      setUserId(passwordMatch.id)
+      setUser("valid");
+      setHead(payment);
+    } 
     else {
-      alert("Uživatelské jméno neexistuje nebo je špatně zadané")
+      if (userExists) {
+        alert("Špatně zadané heslo.");
+      } else {
+        alert("Uživatelské jméno neexistuje nebo je špatně zadané");
+      }
     }
   };
 
@@ -168,7 +173,6 @@ function App() {
       <button onClick={handleLogout}>Odhlásit</button>
     </div>
   )
-
   const [temperature, setTemperature] = useState("Loading...");
   const [humidity, setHumidity] = useState("Loading...");
   const [wind, setWind] = useState("Loading...");
@@ -185,27 +189,28 @@ function App() {
   const [snow, setSnow] = useState("")
 
   const [user, setUser] = useState("")
+  const [userId, setUserId] = useState("")
 
   var d = new Date()
-  var dOneDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dOneDay = (d.getDate(d.setDate(d.getDate() - 1))).toString().padStart(2, '0');
   var dOneMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dOneYear = d.getFullYear(d.setDate(d.getDate()))
-  var dTwoDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dTwoDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dTwoMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dTwoYear = d.getFullYear(d.setDate(d.getDate()))
-  var dThreeDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dThreeDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dThreeMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dThreeYear = d.getFullYear(d.setDate(d.getDate()))
-  var dFourDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dFourDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dFourMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dFourYear = d.getFullYear(d.setDate(d.getDate()))
-  var dFiveDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dFiveDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dFiveMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dFiveYear = d.getFullYear(d.setDate(d.getDate()))
-  var dSixDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dSixDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dSixMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSixYear = d.getFullYear(d.setDate(d.getDate()))
-  var dSevenDay = d.getDate(d.setDate(d.getDate() - 1))
+  var dSevenDay = d.getDate(d.setDate(d.getDate() - 1)).toString().padStart(2, '0');
   var dSevenMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSevenYear = d.getFullYear(d.setDate(d.getDate()))
 
@@ -284,11 +289,24 @@ function App() {
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
         setLat(data.coord.lat);
+        if (user === "valid") {
+          const userData = usersData.users.find(user => user.username === userName);
+          const favorites = userData.favorites;
+          for (let i = 0; i < favorites.length; i++) {
+            if (favorites[i] === data.name) {
+              setFavoriteButton(<button><img src={favorite2} className="fav-icon" alt=""></img></button>);
+              return; // Pokud je město v oblíbených, nastav tlačítko a ukonči funkci
+            }
+          }
+        }
+        // Pokud uživatel není "valid" nebo město není v oblíbených, nastav tlačítko na favorite1
+        setFavoriteButton(<button><img src={favorite1} className="fav-icon" alt=""></img></button>);
       })
       .catch(error => {
         console.error('Chyba při získávání dat:', error);
       });
   }, [searchedCity]);
+
 
   useEffect(() => {
     const historyApiUrl = `${historyApi}latitude=${lat}&longitude=${long}${historyApiSet}start_date=${dSevenYear}-${dSevenMonth}-${dSevenDay}&end_date=${dOneYear}-${dOneMonth}-${dOneDay}`
@@ -369,6 +387,7 @@ function App() {
     </table>
   </div>
 
+
   if (user === "") {
     return (
       <div className="block">
@@ -408,7 +427,8 @@ function App() {
         <div className="search">
           <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
           <div className="favs">
-          {favorites}
+            {favorites}
+            {favoriteButton}
           </div>
         </div>
         <div className="weather">
