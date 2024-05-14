@@ -13,11 +13,15 @@ import moonImage from './assets/moon.png'
 import fewCloudsNImage from './assets/fewcloudsn.png'
 import rainNImage from './assets/rainn.png'
 import rainImage from './assets/rain.png'
-import favorite1 from './assets/favorite.png'
-import favorite2 from './assets/favorite2.png'
+import favoritePlus from './assets/favorite.png'
+import favoriteMinus from './assets/favorite2.png'
 import axios from 'axios';
 
 var userName = "";
+var passwordText = "";
+var userId = "";
+var helpCity = "";
+var userFavs = [];
 const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
 const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
 
@@ -28,7 +32,16 @@ const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitatio
 function App() {
   const usersData = require('./users.json')
   const [favorites, setFavorites] = useState("");
-  const [favoriteButton, setFavoriteButton] = useState("");
+
+
+  const handleSelectChange = (event) => {
+    const selectedCity = event.target.value;
+    if (selectedCity !== "Oblíbené:") {
+      setSearchedCity(selectedCity);
+      event.target.value = "Oblíbené:";
+    }
+  };
+
 
   const handleRegistration = async () => {
     const usernameInput = document.getElementById('username');
@@ -48,19 +61,21 @@ function App() {
     }
     else {
       try {
-      const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Users', {
-        username: usernameInput.value,
-        password: passwordInput.value,
-        pay: "no"
-      });
-      console.log(response)
-      setHead(payment);
-      setFavorites("---");
-    } catch (error) {
-      console.error('Chyba při vytváření uživatele:', error);
-      alert('Došlo k chybě při vytváření uživatele. Zkuste to prosím znovu.');
-    }
-  };}
+        await axios.post('https://stin-backend-apimanag.azure-api.net/api/Users', {
+          username: usernameInput.value,
+          password: passwordInput.value,
+          pay: "no"
+        });
+        passwordText = passwordInput.value
+        userName = username;
+        setHead(payment);
+        setFavorites("Oblíbené:");
+      } catch (error) {
+        console.error('Chyba při vytváření uživatele:', error);
+        alert('Došlo k chybě při vytváření uživatele. Zkuste to prosím znovu.');
+      }
+    };
+  }
 
   const handleLogin = async () => {
     const usernameInput = document.getElementById('username');
@@ -76,24 +91,32 @@ function App() {
       userName = username;
       setUser("valid");
       setHead(logout);
+      userId = passwordMatch.id
       const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
       const favorites = response.data;
       const userFavorites = favorites.filter(favorite => favorite.user_id === passwordMatch.id);
-      const cityNames = ["---", ...userFavorites.map(item => item.city)];
-       const selectOptions = cityNames.map(city => <option key={city}>{city}</option>);
-       const selectElement = (
-           <select>
-               {selectOptions}
-           </select>
-       );
-       setFavorites(selectElement);
-    } 
+      for (let i = 0; i < userFavorites.length; i++) {
+        if (userFavorites[i].city === helpCity) {
+          setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>)
+        }
+        userFavs.push(userFavorites[i].city)
+      }
+      const cityNames = ["Oblíbené:", ...userFavorites.map(item => item.city)];
+      const selectOptions = cityNames.map(cityName => <option key={cityName}>{cityName}</option>);
+      const selectElement = (
+        <select onChange={handleSelectChange}>
+          {selectOptions}
+        </select>
+      );
+      setFavorites(selectElement);
+    }
     else if (userExists && passwordMatch) {
       userName = username;
-      setUserId(passwordMatch.id)
+      passwordText = passwordInput.value;
+      userId = passwordMatch.id
       setUser("valid");
       setHead(payment);
-    } 
+    }
     else {
       if (userExists) {
         alert("Špatně zadané heslo.");
@@ -106,10 +129,11 @@ function App() {
   const handleLogout = () => {
     userName = ""
     setUser("")
+    setFavorites("")
     setHead(login)
   }
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     const cardInput = document.getElementById('cardnumber');
     const validInput = document.getElementById('validity');
     const cvcInput = document.getElementById('cvc');
@@ -126,7 +150,31 @@ function App() {
       alert("Zadejte CVC ve formátu XXX.")
     }
     else {
-      setUser("valid")
+      setUser("valid");
+      const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Users');
+      const userData = response.data;
+      const userExists = userData.find(user => user.username === userName);
+      try {
+        await axios.put(`https://stin-backend-apimanag.azure-api.net/api/Users/${userExists.id}`, {
+          id: userExists.id,
+          username: userName,
+          password: passwordText,
+          pay: "yes"
+        });
+      } catch (error) {
+        console.error('Chyba při vytváření uživatele:', error);
+      }
+      const response2 = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
+      const favorites = response2.data;
+      const userFavorites = favorites.filter(favorite => favorite.user_id === userId);
+      const cityNames = ["Oblíbené:", ...userFavorites.map(item => item.city)];
+      const selectOptions = cityNames.map(cityName => <option key={cityName}>{cityName}</option>);
+      const selectElement = (
+        <select onChange={handleSelectChange}>
+          {selectOptions}
+        </select>
+      );
+      setFavorites(selectElement);
       setHead(logout)
     }
   }
@@ -162,6 +210,77 @@ function App() {
     </div>
   );
 
+  const [favoritesButton, setFavoritesButton] = useState("")
+
+  const handleFavoriteButtonClickPlus = async () => {
+    try {
+      // Volání API pro přidání oblíbeného města
+      const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
+        city: helpCity,
+        user_id: userId
+      });
+      console.log(response.data);
+
+      // Přidání města do pole oblíbených měst
+      userFavs.push(helpCity);
+
+      const selectOptions = ["Oblíbené:", ...userFavs].map(cityName => <option key={cityName}>{cityName}</option>);
+      const selectElement = (
+        <select onChange={handleSelectChange}>
+          {selectOptions}
+        </select>
+      );
+      setFavorites(selectElement);
+
+      // Nastavení tlačítka pro odstranění z oblíbených
+      setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
+    } catch (error) {
+      console.error('Chyba při přidávání oblíbeného města:', error);
+    }
+  };
+
+
+  const handleFavoriteButtonClickMinus = async () => {
+    try {
+      // Získání záznamu z oblíbených měst
+      const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
+        params: {
+          city: helpCity,
+          user_id: userId
+        }
+      });
+
+      // Pokud se našel záznam
+      if (response.data.length > 0) {
+        const favoriteId = response.data[0].id;
+
+        // Odstranění záznamu z oblíbených měst
+        await axios.delete(`https://stin-backend-apimanag.azure-api.net/api/Favorites/${favoriteId}`);
+
+        // Odebrání města z pole oblíbených
+        const index = userFavs.indexOf(helpCity);
+        if (index !== -1) {
+          userFavs.splice(index, 1);
+        }
+
+        const selectOptions = ["Oblíbené:", ...userFavs].map(cityName => <option key={cityName}>{cityName}</option>);
+        const selectElement = (
+          <select onChange={handleSelectChange}>
+            {selectOptions}
+          </select>
+        );
+        setFavorites(selectElement);
+
+        // Nastavení tlačítka pro přidání do oblíbených
+        setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>);
+      } else {
+        console.log('Záznam nebyl nalezen.');
+      }
+    } catch (error) {
+      console.error('Chyba při odebírání oblíbeného města:', error);
+    }
+  };
+
 
   const premium = (
     <div className="bot">
@@ -188,9 +307,7 @@ function App() {
   const [rain, setRain] = useState("")
   const [shower, setShower] = useState("")
   const [snow, setSnow] = useState("")
-
   const [user, setUser] = useState("")
-  const [userId, setUserId] = useState("")
 
   var d = new Date()
   var dOneDay = (d.getDate(d.setDate(d.getDate() - 1))).toString().padStart(2, '0');
@@ -273,6 +390,7 @@ function App() {
     }
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
     fetch(apiUrl)
@@ -287,24 +405,17 @@ function App() {
         setHumidity(data.main.humidity + " %");
         setWind(data.wind.speed.toFixed(1) + " km/h");
         setCity(data.name);
+        helpCity = data.name;
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
         setLat(data.coord.lat);
-        if (user === "valid") {
-          const userData = usersData.users.find(user => user.username === userName);
-          const favorites = userData.favorites;
-          for (let i = 0; i < favorites.length; i++) {
-            if (favorites[i] === data.name) {
-              setFavoriteButton(<button><img src={favorite2} className="fav-icon" alt=""></img></button>);
-              return; // Pokud je město v oblíbených, nastav tlačítko a ukonči funkci
-            }
+        for (let i = 0; i < userFavs.length; i++) {
+          if (userFavs[i] === helpCity) {
+            setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>)
+            return;
           }
         }
-        // Pokud uživatel není "valid" nebo město není v oblíbených, nastav tlačítko na favorite1
-        setFavoriteButton(<button><img src={favorite1} className="fav-icon" alt=""></img></button>);
-      })
-      .catch(error => {
-        console.error('Chyba při získávání dat:', error);
+        setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
       });
   }, [searchedCity, user, usersData.users]);
 
@@ -388,7 +499,6 @@ function App() {
     </table>
   </div>
 
-
   if (user === "") {
     return (
       <div className="block">
@@ -429,11 +539,11 @@ function App() {
           <input type="text" placeholder="Zadejte město" onKeyDown={handleKeyDown}></input>
           <div className="favs">
             {favorites}
-            {favoriteButton}
           </div>
+          
         </div>
         <div className="weather">
-          <h2 className="city">{userId} {city}</h2>
+          <h2 className="city">{city} {favoritesButton}</h2>
           <img src={weatherImage} className="weather-icon" alt=""></img>
           <h1 className="temp">{temperature}</h1>
           <div className="details">
