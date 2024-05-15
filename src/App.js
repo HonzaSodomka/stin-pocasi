@@ -37,6 +37,7 @@ function App() {
   const handleSelectChange = (event) => {
     const selectedCity = event.target.value;
     if (selectedCity !== "Oblíbené:") {
+      setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
       setSearchedCity(selectedCity);
       event.target.value = "Oblíbené:";
     }
