@@ -114,7 +114,6 @@ function App() {
       userName = username;
       passwordText = passwordInput.value;
       userId = passwordMatch.id
-      setUser("valid");
       setHead(payment);
     }
     else {
@@ -214,6 +213,7 @@ function App() {
 
   const handleFavoriteButtonClickPlus = async () => {
     try {
+      setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
       // Volání API pro přidání oblíbeného města
       const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
         city: helpCity,
@@ -233,7 +233,7 @@ function App() {
       setFavorites(selectElement);
 
       // Nastavení tlačítka pro odstranění z oblíbených
-      setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
+      
     } catch (error) {
       console.error('Chyba při přidávání oblíbeného města:', error);
     }
@@ -242,6 +242,7 @@ function App() {
 
   const handleFavoriteButtonClickMinus = async () => {
     try {
+      setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
       // Získání záznamu z oblíbených měst
       const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
         params: {
@@ -272,7 +273,7 @@ function App() {
         setFavorites(selectElement);
 
         // Nastavení tlačítka pro přidání do oblíbených
-        setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>);
+        
       } else {
         console.log('Záznam nebyl nalezen.');
       }
