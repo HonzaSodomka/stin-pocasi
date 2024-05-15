@@ -212,8 +212,8 @@ function App() {
   const [favoritesButton, setFavoritesButton] = useState("")
 
   const handleFavoriteButtonClickPlus = async () => {
+    setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
     try {
-      setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
       // Volání API pro přidání oblíbeného města
       const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
         city: helpCity,
@@ -241,9 +241,9 @@ function App() {
 
 
   const handleFavoriteButtonClickMinus = async () => {
+    setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     try {
-      setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
-      // Získání záznamu z oblíbených měst
+            // Získání záznamu z oblíbených měst
       const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
         params: {
           city: helpCity,
