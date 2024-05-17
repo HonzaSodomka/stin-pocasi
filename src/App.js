@@ -122,6 +122,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     userName = ""
     setUser("")
     setFavorites("")
@@ -403,6 +404,7 @@ function App() {
         setHumidity(data.main.humidity + " %");
         setWind(data.wind.speed.toFixed(1) + " km/h");
         setCity(data.name);
+        helpCity = data.name
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
         setLat(data.coord.lat);
@@ -426,7 +428,7 @@ function App() {
     };
 
     fetchWeatherData();
-  }, [searchedCity, user, usersData.users, userFavs]);
+  }, [searchedCity, usersData.users, userFavs]);
 
 
   useEffect(() => {
