@@ -124,6 +124,7 @@ function App() {
   const handleLogout = () => {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     userName = ""
+    userFavs.splice(0, userFavs.length);
     setUser("")
     setFavorites("")
     setHead(login)
@@ -241,16 +242,10 @@ function App() {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     try {
             // Získání záznamu z oblíbených měst
-      const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
-        params: {
-          city: helpCity,
-          user_id: userId
-        }
-      });
-
-      // Pokud se našel záznam
-      if (response.data.length > 0) {
-        const favoriteId = response.data[0].id;
+      const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
+      const favoriteToModify = response.data.find(favorite => favorite.city === helpCity && favorite.user_id === userId);
+      if (favoriteToModify) {
+        const favoriteId = favoriteToModify.id;
 
         // Odstranění záznamu z oblíbených měst
         await axios.delete(`https://stin-backend-apimanag.azure-api.net/api/Favorites/${favoriteId}`);
