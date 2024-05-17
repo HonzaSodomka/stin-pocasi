@@ -392,7 +392,7 @@ function App() {
     }
   };
 
-  /* eslint-disable react-hooks/exhaustive-deps */
+  /* eslint-disable react-hooks/exhaustive-deps */ 
   useEffect(() => {
     const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
     fetch(apiUrl)
