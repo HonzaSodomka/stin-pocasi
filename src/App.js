@@ -65,7 +65,16 @@ function App() {
         passwordText = passwordInput.value
         userName = username;
         setHead(payment);
-        setFavorites("Oblíbené:");
+        const selectElement = (
+          <select onChange={handleSelectChange}>
+            "Oblíbené:"
+          </select>
+        );
+        setFavorites(selectElement)
+        const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Users');
+        const userData = response.data;
+        const passwordMatch = userData.find(user => user.username === usernameInput.value && user.password === passwordInput.value)
+        userId = passwordMatch.id
       } catch (error) {
         console.error('Chyba při vytváření uživatele:', error);
         alert('Došlo k chybě při vytváření uživatele. Zkuste to prosím znovu.');
@@ -125,8 +134,14 @@ function App() {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     userName = ""
     userFavs.splice(0, userFavs.length);
+    console.log(userFavs)
     setUser("")
-    setFavorites("")
+    const selectElement = (
+      <select onChange={handleSelectChange}>
+        "Oblíbené:"
+      </select>
+    );
+    setFavorites(selectElement)
     setHead(login)
   }
 
