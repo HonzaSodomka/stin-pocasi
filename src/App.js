@@ -22,11 +22,6 @@ var passwordText = "";
 var userId = "";
 var helpCity = "";
 var userFavs = [];
-const apiKey = "99cbbc452293ccefcc5dda5b3ad9dc15";
-const apiAdress = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
-
-const historyApi = "https://api.open-meteo.com/v1/forecast?"
-const historyApiSet = "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,snowfall_sum&timezone=auto&"
 
 
 function App() {
@@ -394,54 +389,69 @@ function App() {
 
   /* eslint-disable react-hooks/exhaustive-deps */ 
   useEffect(() => {
-    const apiUrl = `${apiAdress}${searchedCity}&appid=${apiKey}`;
-    fetch(apiUrl)
-      .then(response => {
+    const fetchWeatherData = async () => {
+      const apiUrl = `https://stin-backend-apimanag.azure-api.net/api/Weather/GetWeather?searchedCity=${searchedCity}`;
+
+      try {
+        const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        return response.json();
-      })
-      .then(data => {
+        const data = await response.json();
+
         setTemperature(data.main.temp.toFixed(1) + " °C");
         setHumidity(data.main.humidity + " %");
         setWind(data.wind.speed.toFixed(1) + " km/h");
         setCity(data.name);
-        helpCity = data.name;
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
         setLat(data.coord.lat);
-        for (let i = 0; i < userFavs.length; i++) {
-          if (userFavs[i] === helpCity) {
-            setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>)
-            return;
-          }
+
+        if (userFavs.includes(data.name)) {
+          setFavoritesButton(
+            <button onClick={handleFavoriteButtonClickMinus}>
+              <img src={favoriteMinus} className="fav-icon" alt="minus" />
+            </button>
+          );
+        } else {
+          setFavoritesButton(
+            <button onClick={handleFavoriteButtonClickPlus}>
+              <img src={favoritePlus} className="fav-icon" alt="plus" />
+            </button>
+          );
         }
-        setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
-      });
-  }, [searchedCity, user, usersData.users]);
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    };
+
+    fetchWeatherData();
+  }, [searchedCity, user, usersData.users, userFavs]);
 
 
   useEffect(() => {
-    const historyApiUrl = `${historyApi}latitude=${lat}&longitude=${long}${historyApiSet}start_date=${dSevenYear}-${dSevenMonth}-${dSevenDay}&end_date=${dOneYear}-${dOneMonth}-${dOneDay}`
-    fetch(historyApiUrl)
-      .then(historyResponse => {
+    const fetchWeatherHistory = async () => {
+      const historyApiUrl = `https://stin-backend-apimanag.azure-api.net/api/Weather/GetWeatherHistory?latitude=${lat}&longitude=${long}&startYear=${dSevenYear}&startMonth=${dSevenMonth}&startDay=${dSevenDay}&endYear=${dOneYear}&endMonth=${dOneMonth}&endDay=${dOneDay}`;
+
+      try {
+        const historyResponse = await fetch(historyApiUrl);
         if (!historyResponse.ok) {
           throw new Error('Network response was not ok');
         }
-        return historyResponse.json();
-      })
-      .then(historyData => {
+        const historyData = await historyResponse.json();
+
         setMaxTemp(historyData.daily.temperature_2m_max);
         setMinTemp(historyData.daily.temperature_2m_min);
-        setPrecipitation(historyData.daily.precipitation_sum)
-        setRain(historyData.daily.rain_sum)
-        setShower(historyData.daily.showers_sum)
-        setSnow(historyData.daily.snowfall_sum)
-      })
-      .catch(error => {
+        setPrecipitation(historyData.daily.precipitation_sum);
+        setRain(historyData.daily.rain_sum);
+        setShower(historyData.daily.showers_sum);
+        setSnow(historyData.daily.snowfall_sum);
+      } catch (error) {
         console.error('Chyba při získávání dat:', error);
-      });
+      }
+    };
+
+    fetchWeatherHistory();
   }, [long, lat, dOneDay, dOneMonth, dOneYear, dSevenDay, dSevenMonth, dSevenYear]);
 
   var table = <div className="history">
