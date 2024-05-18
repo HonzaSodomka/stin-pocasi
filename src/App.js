@@ -23,12 +23,11 @@ var userId = "";
 var helpCity = "";
 var userFavs = [];
 
-
 function App() {
   const usersData = require('./users.json')
   const [favorites, setFavorites] = useState("");
 
-
+ // Nastavení hledaného města na oblíbené:
   const handleSelectChange = (event) => {
     const selectedCity = event.target.value;
     if (selectedCity !== "Oblíbené:") {
@@ -38,7 +37,7 @@ function App() {
     }
   };
 
-
+  // Registrace:
   const handleRegistration = async () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -82,6 +81,7 @@ function App() {
     };
   }
 
+  // Přihlášení:
   const handleLogin = async () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -130,6 +130,7 @@ function App() {
     }
   };
 
+  // Ohlášení:
   const handleLogout = () => {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     userName = ""
@@ -145,6 +146,7 @@ function App() {
     setHead(login)
   }
 
+  // Platba:
   const handlePayment = async () => {
     const cardInput = document.getElementById('cardnumber');
     const validInput = document.getElementById('validity');
@@ -191,6 +193,7 @@ function App() {
     }
   }
 
+  // HTML loginu:
   const login = <div className="head">
     <div className="text">
       Pro prémiové služby* se prosím přihlaste:
@@ -209,6 +212,7 @@ function App() {
 
   const [head, setHead] = useState(login);
 
+  // HTML platby:
   const payment = (
     <div className="payment">
       <div className="number">
@@ -224,19 +228,16 @@ function App() {
 
   const [favoritesButton, setFavoritesButton] = useState("")
 
+  // Přidání oblíbeného města:
   const handleFavoriteButtonClickPlus = async () => {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickMinus}><img src={favoriteMinus} className="fav-icon" alt=""></img></button>);
     try {
-      // Volání API pro přidání oblíbeného města
       const response = await axios.post('https://stin-backend-apimanag.azure-api.net/api/Favorites', {
         city: helpCity,
         user_id: userId
       });
       console.log(response.data);
-
-      // Přidání města do pole oblíbených měst
       userFavs.push(helpCity);
-
       const selectOptions = ["Oblíbené:", ...userFavs].map(cityName => <option key={cityName}>{cityName}</option>);
       const selectElement = (
         <select onChange={handleSelectChange}>
@@ -244,33 +245,24 @@ function App() {
         </select>
       );
       setFavorites(selectElement);
-
-      // Nastavení tlačítka pro odstranění z oblíbených
-      
     } catch (error) {
       console.error('Chyba při přidávání oblíbeného města:', error);
     }
   };
 
-
+  // Odebrání oblíbeného města:
   const handleFavoriteButtonClickMinus = async () => {
     setFavoritesButton(<button onClick={handleFavoriteButtonClickPlus}><img src={favoritePlus} className="fav-icon" alt=""></img></button>)
     try {
-            // Získání záznamu z oblíbených měst
       const response = await axios.get('https://stin-backend-apimanag.azure-api.net/api/Favorites');
       const favoriteToModify = response.data.find(favorite => favorite.city === helpCity && favorite.user_id === userId);
       if (favoriteToModify) {
         const favoriteId = favoriteToModify.id;
-
-        // Odstranění záznamu z oblíbených měst
         await axios.delete(`https://stin-backend-apimanag.azure-api.net/api/Favorites/${favoriteId}`);
-
-        // Odebrání města z pole oblíbených
         const index = userFavs.indexOf(helpCity);
         if (index !== -1) {
           userFavs.splice(index, 1);
         }
-
         const selectOptions = ["Oblíbené:", ...userFavs].map(cityName => <option key={cityName}>{cityName}</option>);
         const selectElement = (
           <select onChange={handleSelectChange}>
@@ -278,9 +270,6 @@ function App() {
           </select>
         );
         setFavorites(selectElement);
-
-        // Nastavení tlačítka pro přidání do oblíbených
-        
       } else {
         console.log('Záznam nebyl nalezen.');
       }
@@ -289,13 +278,14 @@ function App() {
     }
   };
 
-
+  // HTML popisu premium verze:
   const premium = (
     <div className="bot">
       *Prémiovými službami se rozumí zobrazení historie počasí 7 dní zpátky a možnost ukládat si oblíbená místa. Při registraci je vyžadován jednorázový poplatek 99 Kč.
     </div>
   );
 
+  // HTML logoutu:
   const logout = (
     <div className="logout">
       <button onClick={handleLogout}>Odhlásit</button>
@@ -340,7 +330,7 @@ function App() {
   var dSevenMonth = (d.getMonth(d.setDate(d.getDate())) + 1).toString().padStart(2, '0');
   var dSevenYear = d.getFullYear(d.setDate(d.getDate()))
 
-
+  // Spouštění vyhledávání zadaného města:
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       setSearchedCity(event.target.value);
@@ -348,6 +338,7 @@ function App() {
     }
   };
 
+  // Nastavení ikony počasí:
   const setWeatherStatus = (status) => {
     switch (status) {
       case "01d":
@@ -398,18 +389,17 @@ function App() {
     }
   };
 
-  /* eslint-disable react-hooks/exhaustive-deps */ 
+  //Volání api pro získání aktuálního počasí:
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const fetchWeatherData = async () => {
       const apiUrl = `https://stin-backend-apimanag.azure-api.net/api/Weather/GetWeather?searchedCity=${searchedCity}`;
-
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-
         setTemperature(data.main.temp.toFixed(1) + " °C");
         setHumidity(data.main.humidity + " %");
         setWind(data.wind.speed.toFixed(1) + " km/h");
@@ -418,7 +408,6 @@ function App() {
         setWeatherStatus(data.weather[0].icon);
         setLong(data.coord.lon);
         setLat(data.coord.lat);
-
         if (userFavs.includes(data.name)) {
           setFavoritesButton(
             <button onClick={handleFavoriteButtonClickMinus}>
@@ -436,22 +425,19 @@ function App() {
         console.error('Fetch error:', error);
       }
     };
-
     fetchWeatherData();
   }, [searchedCity, usersData.users, userFavs]);
 
-
+  //Volání api pro získání historie počasí:
   useEffect(() => {
     const fetchWeatherHistory = async () => {
       const historyApiUrl = `https://stin-backend-apimanag.azure-api.net/api/Weather/GetWeatherHistory?latitude=${lat}&longitude=${long}&startYear=${dSevenYear}&startMonth=${dSevenMonth}&startDay=${dSevenDay}&endYear=${dOneYear}&endMonth=${dOneMonth}&endDay=${dOneDay}`;
-
       try {
         const historyResponse = await fetch(historyApiUrl);
         if (!historyResponse.ok) {
           throw new Error('Network response was not ok');
         }
         const historyData = await historyResponse.json();
-
         setMaxTemp(historyData.daily.temperature_2m_max);
         setMinTemp(historyData.daily.temperature_2m_min);
         setPrecipitation(historyData.daily.precipitation_sum);
@@ -462,10 +448,10 @@ function App() {
         console.error('Chyba při získávání dat:', error);
       }
     };
-
     fetchWeatherHistory();
   }, [long, lat, dOneDay, dOneMonth, dOneYear, dSevenDay, dSevenMonth, dSevenYear]);
 
+  // HTML tabulky s historií počasí:
   var table = <div className="history">
     <table className="historyTable" border="1">
       <thead>
@@ -523,6 +509,7 @@ function App() {
     </table>
   </div>
 
+  // Hlavní HTML podle validace uživatele:
   if (user === "") {
     return (
       <div className="block">
@@ -564,7 +551,6 @@ function App() {
           <div className="favs">
             {favorites}
           </div>
-          
         </div>
         <div className="weather">
           <h2 className="city">{city} {favoritesButton}</h2>
